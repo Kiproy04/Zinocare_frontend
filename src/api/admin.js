@@ -6,3 +6,4 @@ export const getUsers = (role) =>
 export const getAllAnimals = () => api.get('/api/livestock/animal-list')
 
 export const getAllConsultations = () => api.get('/api/consultations/')
+

@@ -6,6 +6,9 @@ const pageTitles = {
   '/admin/users': 'Users',
   '/admin/animals': 'Animals',
   '/admin/consultations': 'Consultations',
+  '/admin/vaccines': 'Vaccines',
+  '/admin/schedules': 'Vaccination Schedules',
+  '/admin/records': 'Vaccination Records',
 }
 
 export default function Header() {

@@ -6,7 +6,11 @@ const links = [
   { to: '/admin/users', label: '👥 Users' },
   { to: '/admin/animals', label: '🐄 Animals' },
   { to: '/admin/consultations', label: '🩺 Consultations' },
+  { to: '/admin/vaccines', label: '💉 Vaccines' },
+  { to: '/admin/schedules', label: '📋 Schedules' },
+  { to: '/admin/records', label: '📝 Records' },
 ]
+
 
 export default function Sidebar() {
   const { logout } = useAuthStore()

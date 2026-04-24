@@ -5,6 +5,9 @@ import Overview from './Overview'
 import Users from './Users'
 import Animals from './Animals'
 import Consultations from './Consultations'
+import Schedules from './Schedules'
+import Records from './Records'
+import Vaccines from './Vaccines'
 
 export default function AdminDashboard() {
   return (
@@ -19,6 +22,9 @@ export default function AdminDashboard() {
             <Route path="users" element={<Users />} />
             <Route path="animals" element={<Animals />} />
             <Route path="consultations" element={<Consultations />} />
+            <Route path="vaccines" element={<Vaccines />} />
+            <Route path="schedules" element={<Schedules />} />
+            <Route path="records" element={<Records />} />
           </Routes>
         </main>
       </div>

@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { getConsultations, requestConsultation, cancelConsultation } from '../../api/consultations'
+import toast from 'react-hot-toast'
+import Spinner from '../../components/Spinner'
 
 const statusColors = {
   REQUESTED: 'bg-blue-100 text-blue-700',
@@ -14,8 +16,6 @@ export default function Consultations() {
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
   const [submitting, setSubmitting] = useState(false)
-  const [error, setError] = useState('')
-  const [success, setSuccess] = useState('')
 
   const { register, handleSubmit, reset } = useForm()
 
@@ -24,7 +24,7 @@ export default function Consultations() {
       const res = await getConsultations()
       setConsultations(res.data)
     } catch {
-      setError('Failed to load consultations.')
+      toast.error('Failed to load consultations.')
     } finally {
       setLoading(false)
     }
@@ -34,16 +34,18 @@ export default function Consultations() {
 
   const onSubmit = async (data) => {
     setSubmitting(true)
-    setError('')
-    setSuccess('')
     try {
       await requestConsultation({ notes: data.notes })
       reset()
       setShowForm(false)
-      setSuccess('Consultation requested successfully!')
+      toast.success('Consultation requested successfully!')
       fetchConsultations()
     } catch (err) {
-      setError(JSON.stringify(err.response?.data) || 'Failed to request consultation.')
+      const errData = err.response?.data
+      const message = errData?.detail ||
+        (typeof errData === 'object' ? Object.values(errData).flat().join(' ') : null) ||
+        'Failed to request consultation.'
+      toast.error(message)
     } finally {
       setSubmitting(false)
     }
@@ -53,15 +55,19 @@ export default function Consultations() {
     if (!confirm('Cancel this consultation?')) return
     try {
       await cancelConsultation(id, { reason: 'Cancelled by farmer' })
+      toast.success('Consultation cancelled.')
       fetchConsultations()
     } catch (err) {
-      setError(JSON.stringify(err.response?.data) || 'Failed to cancel.')
+      const errData = err.response?.data
+      const message = errData?.detail ||
+        (typeof errData === 'object' ? Object.values(errData).flat().join(' ') : null) ||
+        'Failed to cancel.'
+      toast.error(message)
     }
   }
 
   return (
     <div>
-      {/* Top bar */}
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-xl font-bold text-gray-800">My Consultations</h2>
         <button
@@ -72,23 +78,12 @@ export default function Consultations() {
         </button>
       </div>
 
-      {/* Messages */}
-      {error && (
-        <div className="bg-red-50 text-red-600 text-sm px-4 py-3 rounded-lg mb-4">{error}</div>
-      )}
-      {success && (
-        <div className="bg-green-50 text-green-600 text-sm px-4 py-3 rounded-lg mb-4">{success}</div>
-      )}
-
-      {/* Request Form */}
       {showForm && (
         <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
           <h3 className="text-lg font-semibold text-gray-700 mb-4">Request a Vet Consultation</h3>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div>
-              <label className="text-sm font-medium text-gray-700">
-                Describe your concern
-              </label>
+              <label className="text-sm font-medium text-gray-700">Describe your concern</label>
               <textarea
                 rows={4}
                 placeholder="e.g. My cattle has been limping for 2 days..."
@@ -109,9 +104,8 @@ export default function Consultations() {
         </div>
       )}
 
-      {/* Consultations List */}
       {loading ? (
-        <p className="text-gray-500 text-sm">Loading consultations...</p>
+        <Spinner color="green" />
       ) : consultations.length === 0 ? (
         <div className="bg-white rounded-xl shadow-sm p-12 text-center">
           <p className="text-4xl mb-3">🩺</p>
@@ -132,29 +126,24 @@ export default function Consultations() {
                       Requested: {new Date(c.requested_at).toLocaleDateString()}
                     </span>
                   </div>
-
                   {c.notes && (
                     <p className="text-sm text-gray-600 mt-2">
                       <span className="font-medium">Notes:</span> {c.notes}
                     </p>
                   )}
-
                   {c.scheduled_at && (
                     <p className="text-sm text-gray-600 mt-1">
                       <span className="font-medium">Scheduled:</span>{' '}
                       {new Date(c.scheduled_at).toLocaleString()}
                     </p>
                   )}
-
                   {c.vet && (
                     <p className="text-sm text-gray-600 mt-1">
-                        <span className="font-medium">Vet:</span>{' '}
-                        {c.vet_detail?.full_name || c.vet_detail?.email || c.vet}
+                      <span className="font-medium">Vet:</span>{' '}
+                      {c.vet_detail?.full_name || c.vet_detail?.email || c.vet}
                     </p>
-                    )}
+                  )}
                 </div>
-
-                {/* Cancel button - only for REQUESTED or SCHEDULED */}
                 {['REQUESTED', 'SCHEDULED'].includes(c.status) && (
                   <button
                     onClick={() => handleCancel(c.id)}

@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
-import { getRecords, createRecord } from '../../api/vaccinations'
-import { getVaccines } from '../../api/vaccinations'
+import { getRecords, createRecord, getVaccines } from '../../api/vaccinations'
+import { getAnimals } from '../../api/livestock'
+import toast from 'react-hot-toast'
+import Spinner from '../../components/Spinner'
 
 export default function VaccinationRecords() {
   const [records, setRecords] = useState([])
@@ -10,21 +12,21 @@ export default function VaccinationRecords() {
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
   const [submitting, setSubmitting] = useState(false)
-  const [error, setError] = useState('')
-  const [success, setSuccess] = useState('')
 
   const { register, handleSubmit, reset, formState: { errors } } = useForm()
 
   const fetchData = async () => {
     try {
-      const [recordsRes, vaccinesRes] = await Promise.all([
+      const [recordsRes, vaccinesRes, animalsRes] = await Promise.all([
         getRecords(),
         getVaccines(),
+        getAnimals(),
       ])
       setRecords(recordsRes.data)
       setVaccines(vaccinesRes.data)
+      setAnimals(animalsRes.data)
     } catch {
-      setError('Failed to load records.')
+      toast.error('Failed to load records.')
     } finally {
       setLoading(false)
     }
@@ -34,8 +36,6 @@ export default function VaccinationRecords() {
 
   const onSubmit = async (data) => {
     setSubmitting(true)
-    setError('')
-    setSuccess('')
     try {
       await createRecord({
         animal: data.animal,
@@ -46,10 +46,14 @@ export default function VaccinationRecords() {
       })
       reset()
       setShowForm(false)
-      setSuccess('Vaccination record added successfully!')
+      toast.success('Vaccination record added successfully!')
       fetchData()
     } catch (err) {
-      setError(JSON.stringify(err.response?.data) || 'Failed to add record.')
+      const errData = err.response?.data
+      const message = errData?.detail ||
+        (typeof errData === 'object' ? Object.values(errData).flat().join(' ') : null) ||
+        'Failed to add record.'
+      toast.error(message)
     } finally {
       setSubmitting(false)
     }
@@ -57,7 +61,6 @@ export default function VaccinationRecords() {
 
   return (
     <div>
-      {/* Top bar */}
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-xl font-bold text-gray-800">Vaccination Records</h2>
         <button
@@ -68,27 +71,23 @@ export default function VaccinationRecords() {
         </button>
       </div>
 
-      {/* Messages */}
-      {error && (
-        <div className="bg-red-50 text-red-600 text-sm px-4 py-3 rounded-lg mb-4">{error}</div>
-      )}
-      {success && (
-        <div className="bg-green-50 text-green-600 text-sm px-4 py-3 rounded-lg mb-4">{success}</div>
-      )}
-
-      {/* Add Record Form */}
       {showForm && (
         <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
           <h3 className="text-lg font-semibold text-gray-700 mb-4">Log Vaccination Record</h3>
           <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-2 gap-4">
-
             <div>
-              <label className="text-sm font-medium text-gray-700">Animal UUID</label>
-              <input
-                placeholder="Paste animal UUID"
+              <label className="text-sm font-medium text-gray-700">Animal</label>
+              <select
                 className="mt-1 w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 {...register('animal', { required: 'Required' })}
-              />
+              >
+                <option value="">Select animal</option>
+                {animals.map((a) => (
+                  <option key={a.id} value={a.id}>
+                    {a.name} — {a.species} {a.breed ? `(${a.breed})` : ''}
+                  </option>
+                ))}
+              </select>
               {errors.animal && <p className="text-red-500 text-xs mt-1">{errors.animal.message}</p>}
             </div>
 
@@ -144,14 +143,12 @@ export default function VaccinationRecords() {
                 {submitting ? 'Saving...' : 'Save Record'}
               </button>
             </div>
-
           </form>
         </div>
       )}
 
-      {/* Records List */}
       {loading ? (
-        <p className="text-gray-500 text-sm">Loading records...</p>
+        <Spinner color="blue" />
       ) : records.length === 0 ? (
         <div className="bg-white rounded-xl shadow-sm p-12 text-center">
           <p className="text-4xl mb-3">💉</p>

@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react'
 import { getUsers } from '../../api/admin'
+import toast from 'react-hot-toast'
+import Spinner from '../../components/Spinner'
 
 const roleColors = {
   mkulima: 'bg-green-100 text-green-700',
@@ -11,7 +13,6 @@ export default function Users() {
   const [users, setUsers] = useState([])
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState('')
-  const [error, setError] = useState('')
 
   const fetchUsers = async (role) => {
     setLoading(true)
@@ -19,7 +20,7 @@ export default function Users() {
       const res = await getUsers(role)
       setUsers(res.data)
     } catch {
-      setError('Failed to load users.')
+      toast.error('Failed to load users.')
     } finally {
       setLoading(false)
     }
@@ -48,12 +49,8 @@ export default function Users() {
         </div>
       </div>
 
-      {error && (
-        <div className="bg-red-50 text-red-600 text-sm px-4 py-3 rounded-lg mb-4">{error}</div>
-      )}
-
       {loading ? (
-        <p className="text-gray-500 text-sm">Loading users...</p>
+        <Spinner color="purple" />
       ) : users.length === 0 ? (
         <div className="bg-white rounded-xl shadow-sm p-12 text-center">
           <p className="text-4xl mb-3">👥</p>

@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react'
 import { getAllVaccines } from '../../api/admin'
+import toast from 'react-hot-toast'
+import Spinner from '../../components/Spinner'
 
 const routeLabels = {
   IM: 'Intramuscular',
@@ -11,12 +13,11 @@ const routeLabels = {
 export default function Vaccines() {
   const [vaccines, setVaccines] = useState([])
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
 
   useEffect(() => {
     getAllVaccines()
       .then(res => setVaccines(res.data))
-      .catch(() => setError('Failed to load vaccines.'))
+      .catch(() => toast.error('Failed to load vaccines.'))
       .finally(() => setLoading(false))
   }, [])
 
@@ -27,12 +28,8 @@ export default function Vaccines() {
         <p className="text-xs text-gray-400">Vaccines are added by vets</p>
       </div>
 
-      {error && (
-        <div className="bg-red-50 text-red-600 text-sm px-4 py-3 rounded-lg mb-4">{error}</div>
-      )}
-
       {loading ? (
-        <p className="text-gray-500 text-sm">Loading vaccines...</p>
+        <Spinner color="purple" />
       ) : vaccines.length === 0 ? (
         <div className="bg-white rounded-xl shadow-sm p-12 text-center">
           <p className="text-4xl mb-3">💉</p>

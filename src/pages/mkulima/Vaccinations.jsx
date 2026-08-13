@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { getSchedules, createSchedule, getVaccines } from '../../api/vaccinations'
 import { getAnimals } from '../../api/livestock'
+import toast from 'react-hot-toast'
+import Spinner from '../../components/Spinner'
 
 const statusColors = {
   ACTIVE: 'bg-yellow-100 text-yellow-700',
@@ -16,7 +18,6 @@ export default function Vaccinations() {
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
   const [submitting, setSubmitting] = useState(false)
-  const [error, setError] = useState('')
 
   const { register, handleSubmit, reset, formState: { errors } } = useForm()
 
@@ -31,7 +32,7 @@ export default function Vaccinations() {
       setAnimals(animalsRes.data)
       setVaccines(vaccinesRes.data)
     } catch {
-      setError('Failed to load vaccination data.')
+      toast.error('Failed to load vaccination data.')
     } finally {
       setLoading(false)
     }
@@ -41,7 +42,6 @@ export default function Vaccinations() {
 
   const onSubmit = async (data) => {
     setSubmitting(true)
-    setError('')
     try {
       await createSchedule({
         animal: data.animal,
@@ -51,9 +51,14 @@ export default function Vaccinations() {
       })
       reset()
       setShowForm(false)
+      toast.success('Vaccination schedule created!')
       fetchData()
     } catch (err) {
-      setError(JSON.stringify(err.response?.data) || 'Failed to create schedule.')
+      const errData = err.response?.data
+      const message = errData?.detail ||
+        (typeof errData === 'object' ? Object.values(errData).flat().join(' ') : null) ||
+        'Failed to create schedule.'
+      toast.error(message)
     } finally {
       setSubmitting(false)
     }
@@ -61,7 +66,6 @@ export default function Vaccinations() {
 
   return (
     <div>
-      {/* Top bar */}
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-xl font-bold text-gray-800">Vaccination Schedules</h2>
         <button
@@ -72,17 +76,10 @@ export default function Vaccinations() {
         </button>
       </div>
 
-      {/* Error */}
-      {error && (
-        <div className="bg-red-50 text-red-600 text-sm px-4 py-3 rounded-lg mb-4">{error}</div>
-      )}
-
-      {/* New Schedule Form */}
       {showForm && (
         <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
           <h3 className="text-lg font-semibold text-gray-700 mb-4">Schedule Vaccination</h3>
           <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-2 gap-4">
-
             <div>
               <label className="text-sm font-medium text-gray-700">Animal</label>
               <select
@@ -91,9 +88,7 @@ export default function Vaccinations() {
               >
                 <option value="">Select animal</option>
                 {animals.map((a) => (
-                  <option key={a.id} value={a.id}>
-                    {a.name} ({a.species})
-                  </option>
+                  <option key={a.id} value={a.id}>{a.name} ({a.species})</option>
                 ))}
               </select>
               {errors.animal && <p className="text-red-500 text-xs mt-1">{errors.animal.message}</p>}
@@ -107,9 +102,7 @@ export default function Vaccinations() {
               >
                 <option value="">Select vaccine</option>
                 {vaccines.map((v) => (
-                  <option key={v.id} value={v.id}>
-                    {v.name}
-                  </option>
+                  <option key={v.id} value={v.id}>{v.name}</option>
                 ))}
               </select>
               {errors.vaccine && <p className="text-red-500 text-xs mt-1">{errors.vaccine.message}</p>}
@@ -146,14 +139,12 @@ export default function Vaccinations() {
                 {submitting ? 'Saving...' : 'Save Schedule'}
               </button>
             </div>
-
           </form>
         </div>
       )}
 
-      {/* Schedules List */}
       {loading ? (
-        <p className="text-gray-500 text-sm">Loading schedules...</p>
+        <Spinner color="green" />
       ) : schedules.length === 0 ? (
         <div className="bg-white rounded-xl shadow-sm p-12 text-center">
           <p className="text-4xl mb-3">💉</p>
@@ -176,7 +167,7 @@ export default function Vaccinations() {
               {schedules.map((s) => (
                 <tr key={s.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 font-medium text-gray-800">
-                    {animals.find(a => a.id === s.animal)?.name || s.animal}
+                    {s.animal_detail?.name || s.animal_detail?.species || s.animal}
                   </td>
                   <td className="px-6 py-4 text-gray-600">
                     {vaccines.find(v => v.id === s.vaccine)?.name || s.vaccine}

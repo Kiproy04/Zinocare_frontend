@@ -5,6 +5,7 @@ import Consultations from './Consultations'
 import VaccinationRecords from './VaccinationRecords'
 import Profile from './Profile'
 
+
 export default function VetDashboard() {
   return (
     <div className="flex h-screen bg-gray-100">

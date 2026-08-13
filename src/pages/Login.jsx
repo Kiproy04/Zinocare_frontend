@@ -3,11 +3,12 @@ import { useNavigate, Link } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { loginUser } from '../api/auth'
 import useAuthStore from '../context/authStore'
+import toast from 'react-hot-toast'
+
 
 export default function Login() {
   const navigate = useNavigate()
   const { login } = useAuthStore()
-  const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
   const {
@@ -18,7 +19,7 @@ export default function Login() {
 
   const onSubmit = async (data) => {
     setLoading(true)
-    setError('')
+    toast.error('')
     try {
       const res = await loginUser(data)
       const { access, refresh, role, user_id, email } = res.data
@@ -32,7 +33,7 @@ export default function Login() {
       else navigate('/login')
 
     } catch (err) {
-      setError(
+      toast.error(
         err.response?.data?.detail ||
         'Login failed. Check your credentials and try again.'
       )
@@ -50,13 +51,6 @@ export default function Login() {
           <h1 className="text-3xl font-bold text-green-600">Zinocare</h1>
           <p className="text-gray-500 mt-1 text-sm">Livestock Management Platform</p>
         </div>
-
-        {/* Error message */}
-        {error && (
-          <div className="bg-red-50 text-red-600 text-sm px-4 py-3 rounded-lg mb-4">
-            {error}
-          </div>
-        )}
 
         {/* Form */}
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">

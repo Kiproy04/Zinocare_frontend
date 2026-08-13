@@ -5,6 +5,9 @@ import {
   scheduleConsultation,
   completeConsultation,
 } from '../../api/consultations'
+import toast from 'react-hot-toast'
+import Spinner from '../../components/Spinner'
+
 
 const statusColors = {
   REQUESTED: 'bg-blue-100 text-blue-700',
@@ -16,7 +19,6 @@ const statusColors = {
 export default function VetConsultations() {
   const [consultations, setConsultations] = useState([])
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
   const [activeId, setActiveId] = useState(null)
   const [action, setAction] = useState(null)
 
@@ -27,7 +29,7 @@ export default function VetConsultations() {
       const res = await getConsultations()
       setConsultations(res.data)
     } catch {
-      setError('Failed to load consultations.')
+      toast.error('Failed to load consultations.')
     } finally {
       setLoading(false)
     }
@@ -53,9 +55,10 @@ export default function VetConsultations() {
         scheduled_at: new Date(data.scheduled_at).toISOString(),
       })
       closeAction()
+      toast.success('Consultation scheduled!')
       fetchConsultations()
     } catch (err) {
-      setError(JSON.stringify(err.response?.data) || 'Failed to schedule.')
+      toast.error(JSON.stringify(err.response?.data) || 'Failed to schedule.')
     }
   }
 
@@ -63,9 +66,10 @@ export default function VetConsultations() {
     try {
       await completeConsultation(activeId, { notes: data.notes })
       closeAction()
+      toast.success('Consultation marked as complete!')
       fetchConsultations()
     } catch (err) {
-      setError(JSON.stringify(err.response?.data) || 'Failed to complete.')
+      toast.error(JSON.stringify(err.response?.data) || 'Failed to complete.')
     }
   }
 
@@ -77,12 +81,11 @@ export default function VetConsultations() {
         <h2 className="text-xl font-bold text-gray-800">Consultations</h2>
       </div>
 
-      {error && (
-        <div className="bg-red-50 text-red-600 text-sm px-4 py-3 rounded-lg mb-4">{error}</div>
-      )}
 
       {loading ? (
-        <p className="text-gray-500 text-sm">Loading consultations...</p>
+        <p className="text-gray-500 text-sm">Loading consultations...
+        <Spinner color="blue" /> </p>
+        
       ) : consultations.length === 0 ? (
         <div className="bg-white rounded-xl shadow-sm p-12 text-center">
           <p className="text-4xl mb-3">🩺</p>

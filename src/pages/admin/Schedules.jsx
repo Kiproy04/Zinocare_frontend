@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react'
 import { getAllSchedules, getAllVaccines, getAllAnimals } from '../../api/admin'
+import toast from 'react-hot-toast'
+import Spinner from '../../components/Spinner'
 
 const statusColors = {
   ACTIVE: 'bg-yellow-100 text-yellow-700',
@@ -12,7 +14,6 @@ export default function Schedules() {
   const [vaccines, setVaccines] = useState([])
   const [animals, setAnimals] = useState([])
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
 
   useEffect(() => {
     Promise.all([getAllSchedules(), getAllVaccines(), getAllAnimals()])
@@ -21,20 +22,15 @@ export default function Schedules() {
         setVaccines(vaccinesRes.data)
         setAnimals(animalsRes.data)
       })
-      .catch(() => setError('Failed to load schedules.'))
+      .catch(() => toast.error('Failed to load schedules.'))
       .finally(() => setLoading(false))
   }, [])
 
   return (
     <div>
       <h2 className="text-xl font-bold text-gray-800 mb-6">Vaccination Schedules</h2>
-
-      {error && (
-        <div className="bg-red-50 text-red-600 text-sm px-4 py-3 rounded-lg mb-4">{error}</div>
-      )}
-
       {loading ? (
-        <p className="text-gray-500 text-sm">Loading schedules...</p>
+        <Spinner color="purple" />
       ) : schedules.length === 0 ? (
         <div className="bg-white rounded-xl shadow-sm p-12 text-center">
           <p className="text-4xl mb-3">📋</p>

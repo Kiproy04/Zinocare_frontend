@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react'
 import { getAllRecords, getAllVaccines } from '../../api/admin'
+import toast from 'react-hot-toast'
+import Spinner from '../../components/Spinner'
 
 export default function Records() {
   const [records, setRecords] = useState([])
   const [vaccines, setVaccines] = useState([])
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
 
   useEffect(() => {
     Promise.all([getAllRecords(), getAllVaccines()])
@@ -13,20 +14,15 @@ export default function Records() {
         setRecords(recordsRes.data)
         setVaccines(vaccinesRes.data)
       })
-      .catch(() => setError('Failed to load records.'))
+      .catch(() => toast.error('Failed to load records.'))
       .finally(() => setLoading(false))
   }, [])
 
   return (
     <div>
       <h2 className="text-xl font-bold text-gray-800 mb-6">Vaccination Records</h2>
-
-      {error && (
-        <div className="bg-red-50 text-red-600 text-sm px-4 py-3 rounded-lg mb-4">{error}</div>
-      )}
-
       {loading ? (
-        <p className="text-gray-500 text-sm">Loading records...</p>
+        <Spinner color="purple" />
       ) : records.length === 0 ? (
         <div className="bg-white rounded-xl shadow-sm p-12 text-center">
           <p className="text-4xl mb-3">💉</p>

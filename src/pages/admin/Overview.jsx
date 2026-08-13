@@ -1,13 +1,10 @@
 import { useState, useEffect } from 'react'
 import { getUsers, getAllAnimals, getAllConsultations } from '../../api/admin'
+import toast from 'react-hot-toast'
+import Spinner from '../../components/Spinner'
 
 export default function Overview() {
-  const [stats, setStats] = useState({
-    farmers: 0,
-    vets: 0,
-    animals: 0,
-    consultations: 0,
-  })
+  const [stats, setStats] = useState({ farmers: 0, vets: 0, animals: 0, consultations: 0 })
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -26,7 +23,7 @@ export default function Overview() {
           consultations: consultationsRes.data.length,
         })
       } catch {
-        console.error('Failed to load stats')
+        toast.error('Failed to load stats.')
       } finally {
         setLoading(false)
       }
@@ -45,7 +42,7 @@ export default function Overview() {
     <div>
       <h2 className="text-xl font-bold text-gray-800 mb-6">System Overview</h2>
       {loading ? (
-        <p className="text-gray-500 text-sm">Loading stats...</p>
+        <Spinner color="purple" />
       ) : (
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {cards.map((card) => (

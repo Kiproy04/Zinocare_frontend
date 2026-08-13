@@ -96,7 +96,7 @@ export default function Animals() {
                 <option value="goat">Goat</option>
                 <option value="sheep">Sheep</option>
                 <option value="pig">Pig</option>
-                <option value="chicken">Chicken</option>
+                <option value="poultry">Poultry</option>
                 <option value="other">Other</option>
               </select>
               {errors.species && <p className="text-red-500 text-xs mt-1">{errors.species.message}</p>}
@@ -170,7 +170,7 @@ export default function Animals() {
                    animal.species === 'goat' ? '🐐' :
                    animal.species === 'sheep' ? '🐑' :
                    animal.species === 'pig' ? '🐷' :
-                   animal.species === 'chicken' ? '🐔' : '🐾'}
+                   animal.species === 'poultry' ? '🐔' : '🐾'}
                 </span>
               </div>
               <div className="mt-4 flex justify-end">

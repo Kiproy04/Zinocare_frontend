@@ -56,7 +56,7 @@ export default function Schedules() {
               {schedules.map((s) => (
                 <tr key={s.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 font-medium text-gray-800">
-                    {animals.find(a => a.id === s.animal)?.name || s.animal}
+                    {s.animal_detail?.name || s.animal_detail?.species || s.animal}
                   </td>
                   <td className="px-6 py-4 text-gray-600">
                     {vaccines.find(v => v.id === s.vaccine)?.name || s.vaccine}

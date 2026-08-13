@@ -173,8 +173,8 @@ export default function VaccinationRecords() {
             <tbody className="divide-y divide-gray-100">
               {records.map((r) => (
                 <tr key={r.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 text-gray-800 font-mono text-xs">
-                    {r.animal}
+                  <td className="px-6 py-4 font-medium text-gray-800">
+                    {r.animal_detail?.name || r.animal_detail?.species || r.animal}
                   </td>
                   <td className="px-6 py-4 text-gray-600">
                     {vaccines.find(v => v.id === r.vaccine)?.name || r.vaccine}

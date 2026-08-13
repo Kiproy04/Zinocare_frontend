@@ -48,15 +48,17 @@ export default function Records() {
             <tbody className="divide-y divide-gray-100">
               {records.map((r) => (
                 <tr key={r.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 font-medium text-gray-800 font-mono text-xs">
-                    {r.animal}
+                  <td className="px-6 py-4 font-medium text-gray-800">
+                    {r.animal_detail?.name || r.animal_detail?.species || r.animal}
                   </td>
                   <td className="px-6 py-4 text-gray-600">
                     {vaccines.find(v => v.id === r.vaccine)?.name || r.vaccine}
                   </td>
                   <td className="px-6 py-4 text-gray-600">{r.date_administered}</td>
                   <td className="px-6 py-4 text-gray-600">{r.batch_number || '—'}</td>
-                  <td className="px-6 py-4 text-gray-600">{r.performed_by || '—'}</td>
+                  <td className="px-6 py-4 text-gray-600">
+                    {r.performed_by_name || r.performed_by_email || '—'}
+                  </td>
                   <td className="px-6 py-4 text-gray-600">{r.notes || '—'}</td>
                 </tr>
               ))}

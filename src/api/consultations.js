@@ -1,6 +1,6 @@
 import api from './axios'
 
-export const getConsultations = () => api.get('/consultations/')
+export const getConsultations = (page = 1) => api.get('/consultations/', { params: { page } })
 export const requestConsultation = (data) => api.post('/consultations/request/', data)
 export const cancelConsultation = (id, data) => api.patch(`/consultations/cancel/${id}/`, data)
 export const scheduleConsultation = (id, data) => api.patch(`/consultations/schedule/${id}/`, data)

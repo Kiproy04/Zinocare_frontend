@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react'
 import { getUsers, getAllAnimals, getAllConsultations } from '../../api/admin'
 import toast from 'react-hot-toast'
 import Spinner from '../../components/Spinner'
+import Pagination from '../../components/Pagination'
+import { extractResults } from '../../utils/pagination'
 
 
 export default function Overview() {
@@ -18,10 +20,10 @@ export default function Overview() {
           getAllConsultations(),
         ])
         setStats({
-          farmers: farmersRes.data.count,
-          vets: vetsRes.data.count,
-          animals: animalsRes.data.count,
-          consultations: consultationsRes.data.count,
+          farmers: farmersRes.data.count ?? extractResults(farmersRes.data).length,
+          vets: vetsRes.data.count ?? extractResults(vetsRes.data).length,
+          animals: animalsRes.data.count ?? extractResults(animalsRes.data).length,
+          consultations: consultationsRes.data.count ?? extractResults(consultationsRes.data).length,
         })
       } catch {
         toast.error('Failed to load stats.')

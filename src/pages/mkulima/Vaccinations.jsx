@@ -4,6 +4,7 @@ import { getSchedules, createSchedule, getVaccines } from '../../api/vaccination
 import { getAnimals } from '../../api/livestock'
 import toast from 'react-hot-toast'
 import Spinner from '../../components/Spinner'
+import Pagination from '../../components/Pagination'
 import { extractResults } from '../../utils/pagination'
 
 const statusColors = {
@@ -19,17 +20,23 @@ export default function Vaccinations() {
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
   const [submitting, setSubmitting] = useState(false)
+  const [page, setPage] = useState(1)
+  const [hasNext, setHasNext] = useState(false)
+  const [hasPrevious, setHasPrevious] = useState(false)
 
   const { register, handleSubmit, reset, formState: { errors } } = useForm()
 
   const fetchData = async () => {
+    setLoading(true)
     try {
       const [schedulesRes, animalsRes, vaccinesRes] = await Promise.all([
-        getSchedules(),
-        getAnimals(),
-        getVaccines(),
+        getSchedules(page),
+        getAnimals(1, 100), // fetch enough for dropdown
+        getVaccines(1),
       ])
       setSchedules(extractResults(schedulesRes.data))
+      setHasNext(!!schedulesRes.data.next)
+      setHasPrevious(!!schedulesRes.data.previous)
       setAnimals(extractResults(animalsRes.data))
       setVaccines(extractResults(vaccinesRes.data))
     } catch {
@@ -39,7 +46,7 @@ export default function Vaccinations() {
     }
   }
 
-  useEffect(() => { fetchData() }, [])
+  useEffect(() => { fetchData() }, [page])
 
   const onSubmit = async (data) => {
     setSubmitting(true)
@@ -53,6 +60,7 @@ export default function Vaccinations() {
       reset()
       setShowForm(false)
       toast.success('Vaccination schedule created!')
+      setPage(1)
       fetchData()
     } catch (err) {
       const errData = err.response?.data
@@ -153,38 +161,41 @@ export default function Vaccinations() {
           <p className="text-gray-400 text-sm mt-1">Click "New Schedule" to get started.</p>
         </div>
       ) : (
-        <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-          <table className="w-full text-sm">
-            <thead className="bg-gray-50 text-gray-600 uppercase text-xs">
-              <tr>
-                <th className="px-6 py-3 text-left">Animal</th>
-                <th className="px-6 py-3 text-left">Vaccine</th>
-                <th className="px-6 py-3 text-left">Next Due</th>
-                <th className="px-6 py-3 text-left">Interval</th>
-                <th className="px-6 py-3 text-left">Status</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {schedules.map((s) => (
-                <tr key={s.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 font-medium text-gray-800">
-                    {s.animal_detail?.name || s.animal_detail?.species || s.animal}
-                  </td>
-                  <td className="px-6 py-4 text-gray-600">
-                    {vaccines.find(v => v.id === s.vaccine)?.name || s.vaccine}
-                  </td>
-                  <td className="px-6 py-4 text-gray-600">{s.next_due}</td>
-                  <td className="px-6 py-4 text-gray-600">{s.interval_days} days</td>
-                  <td className="px-6 py-4">
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${statusColors[s.status] || 'bg-gray-100 text-gray-600'}`}>
-                      {s.status}
-                    </span>
-                  </td>
+        <>
+          <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+            <table className="w-full text-sm">
+              <thead className="bg-gray-50 text-gray-600 uppercase text-xs">
+                <tr>
+                  <th className="px-6 py-3 text-left">Animal</th>
+                  <th className="px-6 py-3 text-left">Vaccine</th>
+                  <th className="px-6 py-3 text-left">Next Due</th>
+                  <th className="px-6 py-3 text-left">Interval</th>
+                  <th className="px-6 py-3 text-left">Status</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {schedules.map((s) => (
+                  <tr key={s.id} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 font-medium text-gray-800">
+                      {s.animal_detail?.name || s.animal_detail?.species || s.animal}
+                    </td>
+                    <td className="px-6 py-4 text-gray-600">
+                      {vaccines.find(v => v.id === s.vaccine)?.name || s.vaccine}
+                    </td>
+                    <td className="px-6 py-4 text-gray-600">{s.next_due}</td>
+                    <td className="px-6 py-4 text-gray-600">{s.interval_days} days</td>
+                    <td className="px-6 py-4">
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${statusColors[s.status] || 'bg-gray-100 text-gray-600'}`}>
+                        {s.status}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <Pagination page={page} setPage={setPage} hasNext={hasNext} hasPrevious={hasPrevious} />
+        </>
       )}
     </div>
   )

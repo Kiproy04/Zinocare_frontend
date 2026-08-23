@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { getUsers } from '../../api/admin'
 import toast from 'react-hot-toast'
 import Spinner from '../../components/Spinner'
+import Pagination from '../../components/Pagination'
 import { extractResults } from '../../utils/pagination'
 
 const roleColors = {
@@ -14,12 +15,17 @@ export default function Users() {
   const [users, setUsers] = useState([])
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState('')
+  const [page, setPage] = useState(1)
+  const [hasNext, setHasNext] = useState(false)
+  const [hasPrevious, setHasPrevious] = useState(false)
 
-  const fetchUsers = async (role) => {
+  const fetchUsers = async () => {
     setLoading(true)
     try {
-      const res = await getUsers(role)
+      const res = await getUsers(filter, page)
       setUsers(extractResults(res.data))
+      setHasNext(!!res.data.next)
+      setHasPrevious(!!res.data.previous)
     } catch {
       toast.error('Failed to load users.')
     } finally {
@@ -27,7 +33,7 @@ export default function Users() {
     }
   }
 
-  useEffect(() => { fetchUsers(filter) }, [filter])
+  useEffect(() => { fetchUsers() }, [filter, page])
 
   return (
     <div>
@@ -37,7 +43,7 @@ export default function Users() {
           {['', 'mkulima', 'vet'].map((role) => (
             <button
               key={role}
-              onClick={() => setFilter(role)}
+              onClick={() => { setFilter(role); setPage(1) }}
               className={`text-sm px-4 py-1.5 rounded-lg transition ${
                 filter === role
                   ? 'bg-purple-600 text-white'
@@ -58,36 +64,39 @@ export default function Users() {
           <p className="text-gray-500">No users found.</p>
         </div>
       ) : (
-        <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-          <table className="w-full text-sm">
-            <thead className="bg-gray-50 text-gray-600 uppercase text-xs">
-              <tr>
-                <th className="px-6 py-3 text-left">Name</th>
-                <th className="px-6 py-3 text-left">Email</th>
-                <th className="px-6 py-3 text-left">Role</th>
-                <th className="px-6 py-3 text-left">Joined</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {users.map((u) => (
-                <tr key={u.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 font-medium text-gray-800">
-                    {u.full_name || u.username || '—'}
-                  </td>
-                  <td className="px-6 py-4 text-gray-600">{u.email}</td>
-                  <td className="px-6 py-4">
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium capitalize ${roleColors[u.role]}`}>
-                      {u.role}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-gray-500">
-                    {new Date(u.date_joined).toLocaleDateString()}
-                  </td>
+        <>
+          <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+            <table className="w-full text-sm">
+              <thead className="bg-gray-50 text-gray-600 uppercase text-xs">
+                <tr>
+                  <th className="px-6 py-3 text-left">Name</th>
+                  <th className="px-6 py-3 text-left">Email</th>
+                  <th className="px-6 py-3 text-left">Role</th>
+                  <th className="px-6 py-3 text-left">Joined</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {users.map((u) => (
+                  <tr key={u.id} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 font-medium text-gray-800">
+                      {u.full_name || u.username || '—'}
+                    </td>
+                    <td className="px-6 py-4 text-gray-600">{u.email}</td>
+                    <td className="px-6 py-4">
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium capitalize ${roleColors[u.role]}`}>
+                        {u.role}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-gray-500">
+                      {new Date(u.date_joined).toLocaleDateString()}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <Pagination page={page} setPage={setPage} hasNext={hasNext} hasPrevious={hasPrevious} />
+        </>
       )}
     </div>
   )

@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form'
 import { getConsultations, requestConsultation, cancelConsultation } from '../../api/consultations'
 import toast from 'react-hot-toast'
 import Spinner from '../../components/Spinner'
+import Pagination from '../../components/Pagination'
 import { extractResults } from '../../utils/pagination'
 
 const statusColors = {
@@ -17,13 +18,19 @@ export default function Consultations() {
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
   const [submitting, setSubmitting] = useState(false)
+  const [page, setPage] = useState(1)
+  const [hasNext, setHasNext] = useState(false)
+  const [hasPrevious, setHasPrevious] = useState(false)
 
   const { register, handleSubmit, reset } = useForm()
 
   const fetchConsultations = async () => {
+    setLoading(true)
     try {
-      const res = await getConsultations()
+      const res = await getConsultations(page)
       setConsultations(extractResults(res.data))
+      setHasNext(!!res.data.next)
+      setHasPrevious(!!res.data.previous)
     } catch {
       toast.error('Failed to load consultations.')
     } finally {
@@ -31,7 +38,7 @@ export default function Consultations() {
     }
   }
 
-  useEffect(() => { fetchConsultations() }, [])
+  useEffect(() => { fetchConsultations() }, [page])
 
   const onSubmit = async (data) => {
     setSubmitting(true)
@@ -40,6 +47,7 @@ export default function Consultations() {
       reset()
       setShowForm(false)
       toast.success('Consultation requested successfully!')
+      setPage(1)
       fetchConsultations()
     } catch (err) {
       const errData = err.response?.data
@@ -114,49 +122,52 @@ export default function Consultations() {
           <p className="text-gray-400 text-sm mt-1">Click "Request Consultation" to get started.</p>
         </div>
       ) : (
-        <div className="space-y-4">
-          {consultations.map((c) => (
-            <div key={c.id} className="bg-white rounded-xl shadow-sm p-5">
-              <div className="flex items-start justify-between">
-                <div>
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${statusColors[c.status]}`}>
-                      {c.status}
-                    </span>
-                    <span className="text-xs text-gray-400">
-                      Requested: {new Date(c.requested_at).toLocaleDateString()}
-                    </span>
+        <>
+          <div className="space-y-4">
+            {consultations.map((c) => (
+              <div key={c.id} className="bg-white rounded-xl shadow-sm p-5">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${statusColors[c.status]}`}>
+                        {c.status}
+                      </span>
+                      <span className="text-xs text-gray-400">
+                        Requested: {new Date(c.requested_at).toLocaleDateString()}
+                      </span>
+                    </div>
+                    {c.notes && (
+                      <p className="text-sm text-gray-600 mt-2">
+                        <span className="font-medium">Notes:</span> {c.notes}
+                      </p>
+                    )}
+                    {c.scheduled_at && (
+                      <p className="text-sm text-gray-600 mt-1">
+                        <span className="font-medium">Scheduled:</span>{' '}
+                        {new Date(c.scheduled_at).toLocaleString()}
+                      </p>
+                    )}
+                    {c.vet && (
+                      <p className="text-sm text-gray-600 mt-1">
+                        <span className="font-medium">Vet:</span>{' '}
+                        {c.vet_detail?.full_name || c.vet_detail?.email || c.vet}
+                      </p>
+                    )}
                   </div>
-                  {c.notes && (
-                    <p className="text-sm text-gray-600 mt-2">
-                      <span className="font-medium">Notes:</span> {c.notes}
-                    </p>
-                  )}
-                  {c.scheduled_at && (
-                    <p className="text-sm text-gray-600 mt-1">
-                      <span className="font-medium">Scheduled:</span>{' '}
-                      {new Date(c.scheduled_at).toLocaleString()}
-                    </p>
-                  )}
-                  {c.vet && (
-                    <p className="text-sm text-gray-600 mt-1">
-                      <span className="font-medium">Vet:</span>{' '}
-                      {c.vet_detail?.full_name || c.vet_detail?.email || c.vet}
-                    </p>
+                  {['REQUESTED', 'SCHEDULED'].includes(c.status) && (
+                    <button
+                      onClick={() => handleCancel(c.id)}
+                      className="text-xs text-red-400 hover:text-red-600 transition"
+                    >
+                      Cancel
+                    </button>
                   )}
                 </div>
-                {['REQUESTED', 'SCHEDULED'].includes(c.status) && (
-                  <button
-                    onClick={() => handleCancel(c.id)}
-                    className="text-xs text-red-400 hover:text-red-600 transition"
-                  >
-                    Cancel
-                  </button>
-                )}
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+          <Pagination page={page} setPage={setPage} hasNext={hasNext} hasPrevious={hasPrevious} />
+        </>
       )}
     </div>
   )

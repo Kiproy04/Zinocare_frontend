@@ -4,6 +4,7 @@ import { getRecords, createRecord, getVaccines } from '../../api/vaccinations'
 import { getAnimals } from '../../api/livestock'
 import toast from 'react-hot-toast'
 import Spinner from '../../components/Spinner'
+import Pagination from '../../components/Pagination'
 import { extractResults } from '../../utils/pagination'
 
 export default function VaccinationRecords() {
@@ -13,17 +14,23 @@ export default function VaccinationRecords() {
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
   const [submitting, setSubmitting] = useState(false)
+  const [page, setPage] = useState(1)
+  const [hasNext, setHasNext] = useState(false)
+  const [hasPrevious, setHasPrevious] = useState(false)
 
   const { register, handleSubmit, reset, formState: { errors } } = useForm()
 
   const fetchData = async () => {
+    setLoading(true)
     try {
       const [recordsRes, vaccinesRes, animalsRes] = await Promise.all([
-        getRecords(),
-        getVaccines(),
-        getAnimals(),
+        getRecords(page),
+        getVaccines(1),
+        getAnimals(1, 100),
       ])
       setRecords(extractResults(recordsRes.data))
+      setHasNext(!!recordsRes.data.next)
+      setHasPrevious(!!recordsRes.data.previous)
       setVaccines(extractResults(vaccinesRes.data))
       setAnimals(extractResults(animalsRes.data))
     } catch {
@@ -33,7 +40,7 @@ export default function VaccinationRecords() {
     }
   }
 
-  useEffect(() => { fetchData() }, [])
+  useEffect(() => { fetchData() }, [page])
 
   const onSubmit = async (data) => {
     setSubmitting(true)
@@ -48,6 +55,7 @@ export default function VaccinationRecords() {
       reset()
       setShowForm(false)
       toast.success('Vaccination record added successfully!')
+      setPage(1)
       fetchData()
     } catch (err) {
       const errData = err.response?.data
@@ -157,34 +165,37 @@ export default function VaccinationRecords() {
           <p className="text-gray-400 text-sm mt-1">Click "Add Record" to log a vaccination.</p>
         </div>
       ) : (
-        <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-          <table className="w-full text-sm">
-            <thead className="bg-gray-50 text-gray-600 uppercase text-xs">
-              <tr>
-                <th className="px-6 py-3 text-left">Animal</th>
-                <th className="px-6 py-3 text-left">Vaccine</th>
-                <th className="px-6 py-3 text-left">Date</th>
-                <th className="px-6 py-3 text-left">Batch</th>
-                <th className="px-6 py-3 text-left">Notes</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {records.map((r) => (
-                <tr key={r.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 font-medium text-gray-800">
-                    {r.animal_detail?.name || r.animal_detail?.species || r.animal}
-                  </td>
-                  <td className="px-6 py-4 text-gray-600">
-                    {vaccines.find(v => v.id === r.vaccine)?.name || r.vaccine}
-                  </td>
-                  <td className="px-6 py-4 text-gray-600">{r.date_administered}</td>
-                  <td className="px-6 py-4 text-gray-600">{r.batch_number || '—'}</td>
-                  <td className="px-6 py-4 text-gray-600">{r.notes || '—'}</td>
+        <>
+          <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+            <table className="w-full text-sm">
+              <thead className="bg-gray-50 text-gray-600 uppercase text-xs">
+                <tr>
+                  <th className="px-6 py-3 text-left">Animal</th>
+                  <th className="px-6 py-3 text-left">Vaccine</th>
+                  <th className="px-6 py-3 text-left">Date</th>
+                  <th className="px-6 py-3 text-left">Batch</th>
+                  <th className="px-6 py-3 text-left">Notes</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {records.map((r) => (
+                  <tr key={r.id} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 font-medium text-gray-800">
+                      {r.animal_detail?.name || r.animal_detail?.species || r.animal}
+                    </td>
+                    <td className="px-6 py-4 text-gray-600">
+                      {vaccines.find(v => v.id === r.vaccine)?.name || r.vaccine}
+                    </td>
+                    <td className="px-6 py-4 text-gray-600">{r.date_administered}</td>
+                    <td className="px-6 py-4 text-gray-600">{r.batch_number || '—'}</td>
+                    <td className="px-6 py-4 text-gray-600">{r.notes || '—'}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <Pagination page={page} setPage={setPage} hasNext={hasNext} hasPrevious={hasPrevious} />
+        </>
       )}
     </div>
   )

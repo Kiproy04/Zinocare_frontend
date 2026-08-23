@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { getAllConsultations } from '../../api/admin'
 import toast from 'react-hot-toast'
 import Spinner from '../../components/Spinner'
+import Pagination from '../../components/Pagination'
 import { extractResults } from '../../utils/pagination'
 
 const statusColors = {
@@ -14,13 +15,27 @@ const statusColors = {
 export default function AdminConsultations() {
   const [consultations, setConsultations] = useState([])
   const [loading, setLoading] = useState(true)
+  const [page, setPage] = useState(1)
+  const [hasNext, setHasNext] = useState(false)
+  const [hasPrevious, setHasPrevious] = useState(false)
+
+  const fetchConsultations = async () => {
+    setLoading(true)
+    try {
+      const res = await getAllConsultations(page)
+      setConsultations(extractResults(res.data))
+      setHasNext(!!res.data.next)
+      setHasPrevious(!!res.data.previous)
+    } catch {
+      toast.error('Failed to load consultations.')
+    } finally {
+      setLoading(false)
+    }
+  }
 
   useEffect(() => {
-    getAllConsultations()
-      .then(res => setConsultations(extractResults(res.data)))
-      .catch(() => toast.error('Failed to load consultations.'))
-      .finally(() => setLoading(false))
-  }, [])
+    fetchConsultations()
+  }, [page])
 
   return (
     <div>
@@ -33,42 +48,49 @@ export default function AdminConsultations() {
           <p className="text-gray-500">No consultations yet.</p>
         </div>
       ) : (
-        <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-          <table className="w-full text-sm">
-            <thead className="bg-gray-50 text-gray-600 uppercase text-xs">
-              <tr>
-                <th className="px-6 py-3 text-left">Farmer</th>
-                <th className="px-6 py-3 text-left">Vet</th>
-                <th className="px-6 py-3 text-left">Status</th>
-                <th className="px-6 py-3 text-left">Scheduled</th>
-                <th className="px-6 py-3 text-left">Requested</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {consultations.map((c) => (
-                <tr key={c.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 font-medium text-gray-800">
-                    {c.farmer_detail?.full_name || c.farmer_detail?.email || c.farmer}
-                  </td>
-                  <td className="px-6 py-4 text-gray-600">
-                    {c.vet_detail?.full_name || c.vet_detail?.email || '—'}
-                  </td>
-                  <td className="px-6 py-4">
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${statusColors[c.status]}`}>
-                      {c.status}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-gray-500">
-                    {c.scheduled_at ? new Date(c.scheduled_at).toLocaleString() : '—'}
-                  </td>
-                  <td className="px-6 py-4 text-gray-500">
-                    {new Date(c.requested_at).toLocaleDateString()}
-                  </td>
+        <>
+          <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+            <table className="w-full text-sm">
+              <thead className="bg-gray-50 text-gray-600 uppercase text-xs">
+                <tr>
+                  <th className="px-6 py-3 text-left">Farmer</th>
+                  <th className="px-6 py-3 text-left">Vet</th>
+                  <th className="px-6 py-3 text-left">Status</th>
+                  <th className="px-6 py-3 text-left">Scheduled</th>
+                  <th className="px-6 py-3 text-left">Requested</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {consultations.map((c) => (
+                  <tr key={c.id} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 font-medium text-gray-800">
+                      {c.farmer_detail?.full_name || c.farmer_detail?.email || c.farmer}
+                    </td>
+                    <td className="px-6 py-4 text-gray-600">
+                      {c.vet_detail?.full_name || c.vet_detail?.email || '—'}
+                    </td>
+                    <td className="px-6 py-4">
+                      <span
+                        className={`px-2 py-1 rounded-full text-xs font-medium ${
+                          statusColors[c.status] || 'bg-gray-100 text-gray-600'
+                        }`}
+                      >
+                        {c.status}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-gray-500">
+                      {c.scheduled_at ? new Date(c.scheduled_at).toLocaleString() : '—'}
+                    </td>
+                    <td className="px-6 py-4 text-gray-500">
+                      {c.requested_at ? new Date(c.requested_at).toLocaleDateString() : '—'}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <Pagination page={page} setPage={setPage} hasNext={hasNext} hasPrevious={hasPrevious} />
+        </>
       )}
     </div>
   )

@@ -21,7 +21,7 @@ createRoot(document.getElementById('root')).render(
     <App />
   </StrictMode>,
 )
-import * as Sentry from '@sentry/react';
+
 // Add this button component to your app to test Sentry's error tracking
 function ErrorButton() {
   return (

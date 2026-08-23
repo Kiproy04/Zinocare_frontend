@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { getAllAnimals } from '../../api/admin'
 import toast from 'react-hot-toast'
 import Spinner from '../../components/Spinner'
+import { extractResults } from '../../utils/pagination'
 
 export default function AdminAnimals() {
   const [animals, setAnimals] = useState([])
@@ -9,7 +10,7 @@ export default function AdminAnimals() {
 
   useEffect(() => {
     getAllAnimals()
-      .then(res => setAnimals(res.data))
+      .then(res => setAnimals(extractResults(res.data)))
       .catch(() => toast.error('Failed to load animals.'))
       .finally(() => setLoading(false))
   }, [])

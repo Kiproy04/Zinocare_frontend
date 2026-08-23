@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { getAllRecords, getAllVaccines } from '../../api/admin'
 import toast from 'react-hot-toast'
 import Spinner from '../../components/Spinner'
+import { extractResults } from '../../utils/pagination'
 
 export default function Records() {
   const [records, setRecords] = useState([])
@@ -11,8 +12,8 @@ export default function Records() {
   useEffect(() => {
     Promise.all([getAllRecords(), getAllVaccines()])
       .then(([recordsRes, vaccinesRes]) => {
-        setRecords(recordsRes.data)
-        setVaccines(vaccinesRes.data)
+        setRecords(extractResults(recordsRes.data))
+        setVaccines(extractResults(vaccinesRes.data))
       })
       .catch(() => toast.error('Failed to load records.'))
       .finally(() => setLoading(false))

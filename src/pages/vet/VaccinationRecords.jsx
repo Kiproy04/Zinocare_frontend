@@ -4,6 +4,7 @@ import { getRecords, createRecord, getVaccines } from '../../api/vaccinations'
 import { getAnimals } from '../../api/livestock'
 import toast from 'react-hot-toast'
 import Spinner from '../../components/Spinner'
+import { extractResults } from '../../utils/pagination'
 
 export default function VaccinationRecords() {
   const [records, setRecords] = useState([])
@@ -22,9 +23,9 @@ export default function VaccinationRecords() {
         getVaccines(),
         getAnimals(),
       ])
-      setRecords(recordsRes.data)
-      setVaccines(vaccinesRes.data)
-      setAnimals(animalsRes.data)
+      setRecords(extractResults(recordsRes.data))
+      setVaccines(extractResults(vaccinesRes.data))
+      setAnimals(extractResults(animalsRes.data))
     } catch {
       toast.error('Failed to load records.')
     } finally {

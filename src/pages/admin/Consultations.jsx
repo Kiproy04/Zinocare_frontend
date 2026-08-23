@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { getAllConsultations } from '../../api/admin'
 import toast from 'react-hot-toast'
 import Spinner from '../../components/Spinner'
+import { extractResults } from '../../utils/pagination'
 
 const statusColors = {
   REQUESTED: 'bg-blue-100 text-blue-700',
@@ -16,7 +17,7 @@ export default function AdminConsultations() {
 
   useEffect(() => {
     getAllConsultations()
-      .then(res => setConsultations(res.data))
+      .then(res => setConsultations(extractResults(res.data)))
       .catch(() => toast.error('Failed to load consultations.'))
       .finally(() => setLoading(false))
   }, [])

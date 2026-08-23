@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form'
 import { getConsultations, requestConsultation, cancelConsultation } from '../../api/consultations'
 import toast from 'react-hot-toast'
 import Spinner from '../../components/Spinner'
+import { extractResults } from '../../utils/pagination'
 
 const statusColors = {
   REQUESTED: 'bg-blue-100 text-blue-700',
@@ -22,7 +23,7 @@ export default function Consultations() {
   const fetchConsultations = async () => {
     try {
       const res = await getConsultations()
-      setConsultations(res.data)
+      setConsultations(extractResults(res.data))
     } catch {
       toast.error('Failed to load consultations.')
     } finally {

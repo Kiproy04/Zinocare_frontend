@@ -7,6 +7,7 @@ import {
 } from '../../api/consultations'
 import toast from 'react-hot-toast'
 import Spinner from '../../components/Spinner'
+import { extractResults } from '../../utils/pagination'
 
 
 const statusColors = {
@@ -27,7 +28,7 @@ export default function VetConsultations() {
   const fetchConsultations = async () => {
     try {
       const res = await getConsultations()
-      setConsultations(res.data)
+      setConsultations(extractResults(res.data))
     } catch {
       toast.error('Failed to load consultations.')
     } finally {

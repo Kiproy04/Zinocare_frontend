@@ -3,6 +3,7 @@ import { getUsers, getAllAnimals, getAllConsultations } from '../../api/admin'
 import toast from 'react-hot-toast'
 import Spinner from '../../components/Spinner'
 
+
 export default function Overview() {
   const [stats, setStats] = useState({ farmers: 0, vets: 0, animals: 0, consultations: 0 })
   const [loading, setLoading] = useState(true)
@@ -17,10 +18,10 @@ export default function Overview() {
           getAllConsultations(),
         ])
         setStats({
-          farmers: farmersRes.data.length,
-          vets: vetsRes.data.length,
-          animals: animalsRes.data.length,
-          consultations: consultationsRes.data.length,
+          farmers: farmersRes.data.count,
+          vets: vetsRes.data.count,
+          animals: animalsRes.data.count,
+          consultations: consultationsRes.data.count,
         })
       } catch {
         toast.error('Failed to load stats.')

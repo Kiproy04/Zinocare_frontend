@@ -3,19 +3,27 @@ import { getAnimals, addAnimal, deleteAnimal } from '../../api/livestock'
 import { useForm } from 'react-hook-form'
 import toast from 'react-hot-toast'
 import Spinner from '../../components/Spinner'
+import Pagination from '../../components/Pagination'
+import { extractResults } from '../../utils/pagination'
 
 export default function Animals() {
   const [animals, setAnimals] = useState([])
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
   const [submitting, setSubmitting] = useState(false)
+  const [page, setPage] = useState(1)
+  const [hasNext, setHasNext] = useState(false)
+  const [hasPrevious, setHasPrevious] = useState(false)
 
   const { register, handleSubmit, reset, formState: { errors } } = useForm()
 
   const fetchAnimals = async () => {
+    setLoading(true)
     try {
-      const res = await getAnimals()
-      setAnimals(res.data)
+      const res = await getAnimals(page)
+      setAnimals(extractResults(res.data))
+      setHasNext(!!res.data.next)
+      setHasPrevious(!!res.data.previous)
     } catch {
       toast.error('Failed to load animals.')
     } finally {
@@ -23,7 +31,7 @@ export default function Animals() {
     }
   }
 
-  useEffect(() => { fetchAnimals() }, [])
+  useEffect(() => { fetchAnimals() }, [page])
 
   const onSubmit = async (data) => {
     setSubmitting(true)
@@ -32,6 +40,7 @@ export default function Animals() {
       reset()
       setShowForm(false)
       toast.success('Animal added successfully!')
+      setPage(1)
       fetchAnimals()
     } catch (err) {
       toast.error(JSON.stringify(err.response?.data) || 'Failed to add animal.')
@@ -144,33 +153,36 @@ export default function Animals() {
           <p className="text-gray-400 text-sm mt-1">Click "Add Animal" to get started.</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {animals.map((animal) => (
-            <div key={animal.id} className="bg-white rounded-xl shadow-sm p-5">
-              <div className="flex items-start justify-between">
-                <div>
-                  <h3 className="font-semibold text-gray-800">{animal.name}</h3>
-                  <p className="text-sm text-gray-500 capitalize">{animal.species} • {animal.breed || 'Unknown breed'}</p>
-                  <p className="text-xs text-gray-400 mt-1 capitalize">{animal.sex} • DOB: {animal.date_of_birth || 'N/A'}</p>
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {animals.map((animal) => (
+              <div key={animal.id} className="bg-white rounded-xl shadow-sm p-5">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <h3 className="font-semibold text-gray-800">{animal.name}</h3>
+                    <p className="text-sm text-gray-500 capitalize">{animal.species} • {animal.breed || 'Unknown breed'}</p>
+                    <p className="text-xs text-gray-400 mt-1 capitalize">{animal.sex} • DOB: {animal.date_of_birth || 'N/A'}</p>
+                  </div>
+                  <span className="text-2xl">
+                    {animal.species === 'cattle' ? '🐄' :
+                     animal.species === 'goat' ? '🐐' :
+                     animal.species === 'sheep' ? '🐑' :
+                     animal.species === 'poultry' ? '🐔' : '🐾'}
+                  </span>
                 </div>
-                <span className="text-2xl">
-                  {animal.species === 'cattle' ? '🐄' :
-                   animal.species === 'goat' ? '🐐' :
-                   animal.species === 'sheep' ? '🐑' :
-                   animal.species === 'poultry' ? '🐔' : '🐾'}
-                </span>
+                <div className="mt-4 flex justify-end">
+                  <button
+                    onClick={() => handleDelete(animal.id)}
+                    className="text-xs text-red-400 hover:text-red-600 transition"
+                  >
+                    Remove
+                  </button>
+                </div>
               </div>
-              <div className="mt-4 flex justify-end">
-                <button
-                  onClick={() => handleDelete(animal.id)}
-                  className="text-xs text-red-400 hover:text-red-600 transition"
-                >
-                  Remove
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+          <Pagination page={page} setPage={setPage} hasNext={hasNext} hasPrevious={hasPrevious} />
+        </>
       )}
     </div>
   )

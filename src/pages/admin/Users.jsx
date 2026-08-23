@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { getUsers } from '../../api/admin'
 import toast from 'react-hot-toast'
 import Spinner from '../../components/Spinner'
+import { extractResults } from '../../utils/pagination'
 
 const roleColors = {
   mkulima: 'bg-green-100 text-green-700',
@@ -18,7 +19,7 @@ export default function Users() {
     setLoading(true)
     try {
       const res = await getUsers(role)
-      setUsers(res.data)
+      setUsers(extractResults(res.data))
     } catch {
       toast.error('Failed to load users.')
     } finally {

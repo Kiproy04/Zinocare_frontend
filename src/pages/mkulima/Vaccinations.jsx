@@ -4,6 +4,7 @@ import { getSchedules, createSchedule, getVaccines } from '../../api/vaccination
 import { getAnimals } from '../../api/livestock'
 import toast from 'react-hot-toast'
 import Spinner from '../../components/Spinner'
+import { extractResults } from '../../utils/pagination'
 
 const statusColors = {
   ACTIVE: 'bg-yellow-100 text-yellow-700',
@@ -28,9 +29,9 @@ export default function Vaccinations() {
         getAnimals(),
         getVaccines(),
       ])
-      setSchedules(schedulesRes.data)
-      setAnimals(animalsRes.data)
-      setVaccines(vaccinesRes.data)
+      setSchedules(extractResults(schedulesRes.data))
+      setAnimals(extractResults(animalsRes.data))
+      setVaccines(extractResults(vaccinesRes.data))
     } catch {
       toast.error('Failed to load vaccination data.')
     } finally {

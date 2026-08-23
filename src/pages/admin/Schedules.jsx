@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { getAllSchedules, getAllVaccines, getAllAnimals } from '../../api/admin'
 import toast from 'react-hot-toast'
 import Spinner from '../../components/Spinner'
+import { extractResults } from '../../utils/pagination'
 
 const statusColors = {
   ACTIVE: 'bg-yellow-100 text-yellow-700',
@@ -18,9 +19,9 @@ export default function Schedules() {
   useEffect(() => {
     Promise.all([getAllSchedules(), getAllVaccines(), getAllAnimals()])
       .then(([schedulesRes, vaccinesRes, animalsRes]) => {
-        setSchedules(schedulesRes.data)
-        setVaccines(vaccinesRes.data)
-        setAnimals(animalsRes.data)
+        setSchedules(extractResults(schedulesRes.data))
+        setVaccines(extractResults(vaccinesRes.data))
+        setAnimals(extractResults(animalsRes.data))
       })
       .catch(() => toast.error('Failed to load schedules.'))
       .finally(() => setLoading(false))

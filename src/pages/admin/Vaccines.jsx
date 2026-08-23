@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { getAllVaccines } from '../../api/admin'
 import toast from 'react-hot-toast'
 import Spinner from '../../components/Spinner'
+import { extractResults } from '../../utils/pagination'
 
 const routeLabels = {
   IM: 'Intramuscular',
@@ -16,7 +17,7 @@ export default function Vaccines() {
 
   useEffect(() => {
     getAllVaccines()
-      .then(res => setVaccines(res.data))
+      .then(res => setVaccines(extractResults(res.data)))
       .catch(() => toast.error('Failed to load vaccines.'))
       .finally(() => setLoading(false))
   }, [])

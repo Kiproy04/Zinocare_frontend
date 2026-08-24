@@ -18,8 +18,8 @@ Sentry.init({
   tracesSampleRate: 1.0,
 
   dataCollection: {
-    // userInfo: false,
-    // httpBodies: []
+    userInfo: false,
+    httpBodies: []
   }
 });
 

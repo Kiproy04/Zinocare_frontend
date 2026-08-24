@@ -42,10 +42,6 @@ export default function Login() {
     }
   }
 
-  <button onClick={() => { throw new Error("Sentry test error") }}>
-  Test Sentry
-</button>
-
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
       <div className="bg-white w-full max-w-md rounded-2xl shadow-md p-8">

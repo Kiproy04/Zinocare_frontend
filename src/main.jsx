@@ -5,16 +5,14 @@ import * as Sentry from "@sentry/react";
 import './index.css'
 import App from './App.jsx'
 
-if (import.meta.env.PROD) {
-  Sentry.init({
-    dsn: import.meta.env.VITE_SENTRY_DSN,
-    integrations: [
-      Sentry.browserTracingIntegration(),
-    ],
-    tracesSampleRate: 0.2,
-    environment: "production",
-  })
-}
+
+// Temporarily enable in development to test locally
+Sentry.init({
+  dsn: import.meta.env.VITE_SENTRY_DSN,
+  integrations: [Sentry.browserTracingIntegration()],
+  tracesSampleRate: 1.0, // Set to 1.0 during testing
+  environment: import.meta.env.MODE,
+});
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
@@ -22,15 +20,3 @@ createRoot(document.getElementById('root')).render(
   </StrictMode>,
 )
 
-// Add this button component to your app to test Sentry's error tracking
-function ErrorButton() {
-  return (
-    <button
-      onClick={() => {
-        throw new Error('This is your first error!');
-      }}
-    >
-      Break the world
-    </button>
-  );
-}

@@ -30,6 +30,10 @@ Sentry.init({
   environment: 'production',
 })
 
+Sentry.captureException(
+  new Error("Zinocare frontend Sentry test")
+);
+
 const container =
   document.getElementById('app') ||
   document.getElementById('root')

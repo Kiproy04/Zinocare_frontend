@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { registerUser } from '../api/auth'
 import toast from 'react-hot-toast'
-import { getErrorMessage } from '../../utils/errors'
+import { getErrorMessage } from '../utils/errors'
 
 export default function Register() {
   const navigate = useNavigate()

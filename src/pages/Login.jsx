@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form'
 import { loginUser } from '../api/auth'
 import useAuthStore from '../context/authStore'
 import toast from 'react-hot-toast'
-import { getErrorMessage } from '../../utils/errors'
+import { getErrorMessage } from '../utils/errors'
 
 
 export default function Login() {

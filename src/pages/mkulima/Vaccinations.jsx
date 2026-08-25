@@ -6,6 +6,7 @@ import toast from 'react-hot-toast'
 import Spinner from '../../components/Spinner'
 import Pagination from '../../components/Pagination'
 import { extractResults } from '../../utils/pagination'
+import { getErrorMessage } from '../../utils/errors'
 
 const statusColors = {
   ACTIVE: 'bg-yellow-100 text-yellow-700',
@@ -39,8 +40,8 @@ export default function Vaccinations() {
       setHasPrevious(!!schedulesRes.data.previous)
       setAnimals(extractResults(animalsRes.data))
       setVaccines(extractResults(vaccinesRes.data))
-    } catch {
-      toast.error('Failed to load vaccination data.')
+    } catch (err){
+      toast.error(getErrorMessage(err, 'Failed to load vaccination data.'))
     } finally {
       setLoading(false)
     }
@@ -63,11 +64,7 @@ export default function Vaccinations() {
       setPage(1)
       fetchData()
     } catch (err) {
-      const errData = err.response?.data
-      const message = errData?.detail ||
-        (typeof errData === 'object' ? Object.values(errData).flat().join(' ') : null) ||
-        'Failed to create schedule.'
-      toast.error(message)
+      toast.error(getErrorMessage(err, 'Failed to create vaccination schedule.'))
     } finally {
       setSubmitting(false)
     }

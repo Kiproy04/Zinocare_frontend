@@ -6,6 +6,8 @@ import toast from 'react-hot-toast'
 import Spinner from '../../components/Spinner'
 import Pagination from '../../components/Pagination'
 import { extractResults } from '../../utils/pagination'
+import { getErrorMessage } from '../../utils/errors'
+
 
 export default function VaccinationRecords() {
   const [records, setRecords] = useState([])
@@ -33,8 +35,8 @@ export default function VaccinationRecords() {
       setHasPrevious(!!recordsRes.data.previous)
       setVaccines(extractResults(vaccinesRes.data))
       setAnimals(extractResults(animalsRes.data))
-    } catch {
-      toast.error('Failed to load records.')
+    } catch (err) {
+      toast.error(getErrorMessage(err, 'Failed to load records.'))
     } finally {
       setLoading(false)
     }
@@ -58,11 +60,7 @@ export default function VaccinationRecords() {
       setPage(1)
       fetchData()
     } catch (err) {
-      const errData = err.response?.data
-      const message = errData?.detail ||
-        (typeof errData === 'object' ? Object.values(errData).flat().join(' ') : null) ||
-        'Failed to add record.'
-      toast.error(message)
+      toast.error(getErrorMessage(err, 'Failed to add vaccination record.'))
     } finally {
       setSubmitting(false)
     }

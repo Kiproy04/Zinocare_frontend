@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form'
 import { getProfile, updateProfile } from '../../api/auth'
 import toast from 'react-hot-toast'
 import Spinner from '../../components/Spinner'
+import { getErrorMessage } from '../../utils/errors'
 
 export default function VetProfile() {
   const [loading, setLoading] = useState(true)
@@ -20,8 +21,8 @@ export default function VetProfile() {
           license_number: res.data.license_number || '',
           phone_number: res.data.phone_number || '',
         })
-      } catch {
-        toast.error('Failed to load profile.')
+      } catch (err) {
+        toast.error(getErrorMessage(err, 'Failed to load profile.'))
       } finally {
         setLoading(false)
       }
@@ -37,8 +38,8 @@ export default function VetProfile() {
         phone_number: data.phone_number,
       })
       toast.success('Profile updated successfully!')
-    } catch {
-      toast.error('Failed to update profile.')
+    } catch (err) {
+      toast.error(getErrorMessage(err, 'Failed to update profile.'))
     } finally {
       setSaving(false)
     }

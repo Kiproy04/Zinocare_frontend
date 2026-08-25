@@ -5,6 +5,7 @@ import toast from 'react-hot-toast'
 import Spinner from '../../components/Spinner'
 import Pagination from '../../components/Pagination'
 import { extractResults } from '../../utils/pagination'
+import { getErrorMessage } from '../../utils/errors'
 
 const statusColors = {
   REQUESTED: 'bg-blue-100 text-blue-700',
@@ -31,8 +32,8 @@ export default function Consultations() {
       setConsultations(extractResults(res.data))
       setHasNext(!!res.data.next)
       setHasPrevious(!!res.data.previous)
-    } catch {
-      toast.error('Failed to load consultations.')
+    } catch (err) {
+      toast.error(getErrorMessage(err, 'Failed to load consultations.'))
     } finally {
       setLoading(false)
     }
@@ -50,11 +51,7 @@ export default function Consultations() {
       setPage(1)
       fetchConsultations()
     } catch (err) {
-      const errData = err.response?.data
-      const message = errData?.detail ||
-        (typeof errData === 'object' ? Object.values(errData).flat().join(' ') : null) ||
-        'Failed to request consultation.'
-      toast.error(message)
+      toast.error(getErrorMessage(err, 'Failed to request consultation.'))
     } finally {
       setSubmitting(false)
     }
@@ -67,11 +64,7 @@ export default function Consultations() {
       toast.success('Consultation cancelled.')
       fetchConsultations()
     } catch (err) {
-      const errData = err.response?.data
-      const message = errData?.detail ||
-        (typeof errData === 'object' ? Object.values(errData).flat().join(' ') : null) ||
-        'Failed to cancel.'
-      toast.error(message)
+      toast.error(getErrorMessage(err, 'Failed to cancel consultation.'))
     }
   }
 

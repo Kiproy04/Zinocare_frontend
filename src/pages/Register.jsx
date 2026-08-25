@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { registerUser } from '../api/auth'
 import toast from 'react-hot-toast'
+import { getErrorMessage } from '../../utils/errors'
 
 export default function Register() {
   const navigate = useNavigate()
@@ -27,12 +28,8 @@ export default function Register() {
       })
       toast.success('Account created! Please log in.')
       navigate('/login')
-    } catch (err) {
-      const data = err.response?.data
-      const message = data?.detail ||
-        (typeof data === 'object' ? Object.values(data).flat().join(' ') : null) ||
-        'Registration failed. Please try again.'
-      toast.error(message)
+    } catch (err) {   
+      toast.error(getErrorMessage(err, 'Registration failed. Please try again.'))
     } finally {
       setLoading(false)
     }

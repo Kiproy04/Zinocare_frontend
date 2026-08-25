@@ -4,6 +4,7 @@ import toast from 'react-hot-toast'
 import Spinner from '../../components/Spinner'
 import Pagination from '../../components/Pagination'
 import { extractResults } from '../../utils/pagination'
+import { getErrorMessage } from '../../utils/errors'
 
 const roleColors = {
   mkulima: 'bg-green-100 text-green-700',
@@ -26,8 +27,8 @@ export default function Users() {
       setUsers(extractResults(res.data))
       setHasNext(!!res.data.next)
       setHasPrevious(!!res.data.previous)
-    } catch {
-      toast.error('Failed to load users.')
+    } catch (err) {
+      toast.error(getErrorMessage(err, 'Failed to load users.'))
     } finally {
       setLoading(false)
     }

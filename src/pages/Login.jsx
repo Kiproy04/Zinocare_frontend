@@ -4,6 +4,8 @@ import { useForm } from 'react-hook-form'
 import { loginUser } from '../api/auth'
 import useAuthStore from '../context/authStore'
 import toast from 'react-hot-toast'
+import { getErrorMessage } from '../../utils/errors'
+
 
 export default function Login() {
   const navigate = useNavigate()
@@ -32,10 +34,7 @@ export default function Login() {
       else navigate('/login')
 
     } catch (err) {
-      toast.error(
-        err.response?.data?.detail ||
-        'Login failed. Check your credentials and try again.'
-      )
+      toast.error(getErrorMessage(err, 'Failed to login.'))
     } finally {
       setLoading(false)
     }

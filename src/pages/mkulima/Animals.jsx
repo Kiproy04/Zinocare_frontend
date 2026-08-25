@@ -5,6 +5,7 @@ import toast from 'react-hot-toast'
 import Spinner from '../../components/Spinner'
 import Pagination from '../../components/Pagination'
 import { extractResults } from '../../utils/pagination'
+import { getErrorMessage } from '../../utils/errors'
 
 export default function Animals() {
   const [animals, setAnimals] = useState([])
@@ -24,13 +25,13 @@ export default function Animals() {
       setAnimals(extractResults(res.data))
       setHasNext(!!res.data.next)
       setHasPrevious(!!res.data.previous)
-    } catch {
-      toast.error('Failed to load animals.')
+    } catch (err) {
+      toast.error(getErrorMessage(err, 'Failed to load animals.'))
     } finally {
       setLoading(false)
     }
   }
-
+  
   useEffect(() => { fetchAnimals() }, [page])
 
   const onSubmit = async (data) => {
@@ -43,7 +44,7 @@ export default function Animals() {
       setPage(1)
       fetchAnimals()
     } catch (err) {
-      toast.error(JSON.stringify(err.response?.data) || 'Failed to add animal.')
+      toast.error(getErrorMessage(err, 'Failed to add animal.')) 
     } finally {
       setSubmitting(false)
     }

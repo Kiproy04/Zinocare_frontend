@@ -4,6 +4,7 @@ import toast from 'react-hot-toast'
 import Spinner from '../../components/Spinner'
 import Pagination from '../../components/Pagination'
 import { extractResults } from '../../utils/pagination'
+import { getErrorMessage } from '../../utils/errors'
 
 const statusColors = {
   REQUESTED: 'bg-blue-100 text-blue-700',
@@ -26,8 +27,8 @@ export default function AdminConsultations() {
       setConsultations(extractResults(res.data))
       setHasNext(!!res.data.next)
       setHasPrevious(!!res.data.previous)
-    } catch {
-      toast.error('Failed to load consultations.')
+    } catch (err) {
+      toast.error(getErrorMessage(err, 'Failed to load consultations.'))
     } finally {
       setLoading(false)
     }

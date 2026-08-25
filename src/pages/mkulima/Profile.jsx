@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form'
 import { getProfile, updateProfile } from '../../api/auth'
 import toast from 'react-hot-toast'
 import Spinner from '../../components/Spinner'
+import { getErrorMessage } from '../../utils/errors'
 
 export default function Profile() {
   const [loading, setLoading] = useState(true)
@@ -19,8 +20,8 @@ export default function Profile() {
           full_name: res.data.user.full_name || '',
           username: res.data.user.username || '',
         })
-      } catch {
-        toast.error('Failed to load profile.')
+      } catch (err) {
+        toast.error(getErrorMessage(err, 'Failed to load profile.'))
       } finally {
         setLoading(false)
       }
@@ -33,8 +34,8 @@ export default function Profile() {
     try {
       await updateProfile({ farm_name: data.farm_name, location: data.location })
       toast.success('Profile updated successfully!')
-    } catch {
-      toast.error('Failed to update profile.')
+    } catch (err) {
+      toast.error(getErrorMessage(err, 'Failed to update profile.'))
     } finally {
       setSaving(false)
     }

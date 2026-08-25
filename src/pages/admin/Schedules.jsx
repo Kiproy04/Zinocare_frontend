@@ -4,6 +4,7 @@ import toast from 'react-hot-toast'
 import Spinner from '../../components/Spinner'
 import { extractResults } from '../../utils/pagination'
 import Pagination from '../../components/Pagination'
+import { getErrorMessage } from '../../utils/errors'
 
 const statusColors = {
   ACTIVE: 'bg-yellow-100 text-yellow-700',
@@ -26,8 +27,8 @@ export default function Schedules() {
       setSchedules(extractResults(res.data))
       setHasNext(!!res.data.next)
       setHasPrevious(!!res.data.previous)
-    } catch {
-      toast.error('Failed to load schedules.')
+    } catch (err) {
+      toast.error(getErrorMessage(err, 'Failed to load schedules.'))
     } finally {
       setLoading(false)
     }
@@ -42,8 +43,8 @@ export default function Schedules() {
       try {
         const res = await getAllVaccines()
         setVaccines(extractResults(res.data))
-      } catch {
-        // Fallback silently if vaccine lookup fails
+      } catch (err) {
+        toast.error(getErrorMessage(err, 'Failed to load vaccines.'))
       }
     }
     fetchVaccines()

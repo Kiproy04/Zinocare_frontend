@@ -4,7 +4,7 @@ import toast from 'react-hot-toast'
 import Spinner from '../../components/Spinner'
 import Pagination from '../../components/Pagination'
 import { extractResults } from '../../utils/pagination'
-
+import { getErrorMessage } from '../../utils/errors'
 
 export default function Overview() {
   const [stats, setStats] = useState({ farmers: 0, vets: 0, animals: 0, consultations: 0 })
@@ -25,8 +25,8 @@ export default function Overview() {
           animals: animalsRes.data.count ?? extractResults(animalsRes.data).length,
           consultations: consultationsRes.data.count ?? extractResults(consultationsRes.data).length,
         })
-      } catch {
-        toast.error('Failed to load stats.')
+      } catch (err) {
+        toast.error(getErrorMessage(err, 'Failed to load stats.'))
       } finally {
         setLoading(false)
       }

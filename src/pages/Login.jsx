@@ -19,6 +19,15 @@ export function ErrorButton() {
   );
 }
 
+<button
+  onClick={() => {
+    Sentry.captureException(
+      new Error('Zinocare frontend Sentry test')
+    )
+  }}
+>
+  Test Sentry
+</button>
 
 export default function Login() {
   const navigate = useNavigate()

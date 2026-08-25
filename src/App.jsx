@@ -6,8 +6,18 @@ import AdminDashboard from './pages/admin/Dashboard'
 import VetDashboard from './pages/vet/Dashboard'
 import MkulimaDashboard from './pages/mkulima/Dashboard'
 import Unauthorized from './pages/Unauthorized'
+import * as Sentry from "@sentry/react";
 
 function App() {
+      <button
+        onClick={() => {
+          Sentry.captureException(
+            new Error('Zinocare frontend Sentry test')
+          )
+        }}
+      >
+        Test Sentry
+      </button>
   return (
     <BrowserRouter>
       <Routes>

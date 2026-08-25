@@ -6,6 +6,16 @@ import { Toaster } from 'react-hot-toast'
 import './index.css'
 import App from './App.jsx'
 
+console.log(
+  'Sentry DSN configured:',
+  Boolean(import.meta.env.VITE_SENTRY_DSN)
+)
+
+console.log(
+  'Production:',
+  import.meta.env.PROD
+)
+
 Sentry.init({
   dsn: import.meta.env.VITE_SENTRY_DSN,
 

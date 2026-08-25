@@ -4,6 +4,20 @@ import { useForm } from 'react-hook-form'
 import { loginUser } from '../api/auth'
 import useAuthStore from '../context/authStore'
 import toast from 'react-hot-toast'
+import * as Sentry from "@sentry/react";
+
+export function ErrorButton() {
+  return (
+    <button
+      onClick={() => {
+        // Explicitly capture to bypass any event handler swallowing
+        Sentry.captureException(new Error("This is your first Sentry error!"));
+      }}
+    >
+      Break the world
+    </button>
+  );
+}
 
 
 export default function Login() {
